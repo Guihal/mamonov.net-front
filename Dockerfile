@@ -21,6 +21,7 @@ COPY . .
 ARG NUXT_PUBLIC_IS_BATTLE_API
 ENV NUXT_PUBLIC_IS_BATTLE_API=${NUXT_PUBLIC_IS_BATTLE_API}
 
+ENV NODE_OPTIONS="--max-old-space-size=1536"
 RUN pnpm build
 
 # ── Stage 3: Production ──
