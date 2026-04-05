@@ -1,18 +1,35 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
-@theme static {
-  --font-sans: 'Public Sans', sans-serif;
+@font-face {
+  font-family: 'PixCyrillic';
+  src: url('~/assets/fonts/PixCyrillic.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
-  --color-green-50: #effdf5;
-  --color-green-100: #d9fbe8;
-  --color-green-200: #b3f5d1;
-  --color-green-300: #75edae;
-  --color-green-400: #00dc82;
-  --color-green-500: #00c16a;
-  --color-green-600: #00a155;
-  --color-green-700: #007f45;
-  --color-green-800: #016538;
-  --color-green-900: #0a5331;
-  --color-green-950: #052e16;
+@theme static {
+  --font-sans: 'DM Sans', sans-serif;
+}
+
+/* OS-зона: CSS-переменные для macOS light стиля */
+:root {
+  --os-window-bg: #ffffff;
+  --os-window-titlebar: #dfe1e5;
+  --os-window-border: #dadce0;
+  --os-window-radius: 10px;
+  --os-text-primary: #314158;
+  --os-text-secondary: #3d4043;
+  --os-divider: #e2e8f0;
+  --os-taskbar-bg: rgba(248, 244, 244, 0.4);
+  --os-taskbar-radius: 20px;
+
+  /* Traffic lights */
+  --os-tl-close-bg: #ee6b5f;
+  --os-tl-close-ring: #e93f30;
+  --os-tl-minimize-bg: #f5be50;
+  --os-tl-minimize-ring: #f2ad21;
+  --os-tl-expand-bg: #62c655;
+  --os-tl-expand-ring: #47ac3a;
 }

@@ -1,76 +1,144 @@
+<script setup lang="ts">
+import { useMascotStore } from '~/composables/mascot/useMascotStore'
+import { useUser } from '~/composables/user/useUser'
+
+const mascot = useMascotStore()
+const userStore = useUser()
+
+const ctaTo = computed(() => (userStore.isAurhorized ? '/app' : '/app/auth/login'))
+
+onMounted(() => {
+  mascot.setVisible(true)
+})
+</script>
+
 <template>
-  <div>
-    <UPageHero
-      title="Nuxt Starter Template"
-      description="A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours."
-      :links="[{
-        label: 'Get started',
-        to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-        target: '_blank',
-        trailingIcon: 'i-lucide-arrow-right',
-        size: 'xl'
-      }, {
-        label: 'Use this template',
-        to: 'https://github.com/nuxt-ui-templates/starter',
-        target: '_blank',
-        icon: 'i-simple-icons-github',
-        size: 'xl',
-        color: 'neutral',
-        variant: 'subtle'
-      }]"
-    />
+  <div class="landing">
+    <div class="landing__hero">
+      <div class="landing__heading">
+        <h1 class="landing__title">
+          <span class="landing__title-line landing__title-line--right"> Стань мастером </span>
+          <span class="landing__title-line">киберзащиты через</span>
+          <span class="landing__title-line">игру: от zero to hero</span>
+        </h1>
 
-    <UPageSection
-      id="features"
-      title="Everything you need to build modern Nuxt apps"
-      description="Start with a solid foundation. This template includes all the essentials for building production-ready applications with Nuxt UI's powerful component system."
-      :features="[{
-        icon: 'i-lucide-rocket',
-        title: 'Production-ready from day one',
-        description: 'Pre-configured with TypeScript, ESLint, Tailwind CSS, and all the best practices. Focus on building features, not setting up tooling.'
-      }, {
-        icon: 'i-lucide-palette',
-        title: 'Beautiful by default',
-        description: 'Leveraging Nuxt UI\'s design system with automatic dark mode, consistent spacing, and polished components that look great out of the box.'
-      }, {
-        icon: 'i-lucide-zap',
-        title: 'Lightning fast',
-        description: 'Optimized for performance with SSR/SSG support, automatic code splitting, and edge-ready deployment. Your users will love the speed.'
-      }, {
-        icon: 'i-lucide-blocks',
-        title: '100+ components included',
-        description: 'Access Nuxt UI\'s comprehensive component library. From forms to navigation, everything is accessible, responsive, and customizable.'
-      }, {
-        icon: 'i-lucide-code-2',
-        title: 'Developer experience first',
-        description: 'Auto-imports, hot module replacement, and TypeScript support. Write less boilerplate and ship more features.'
-      }, {
-        icon: 'i-lucide-shield-check',
-        title: 'Built for scale',
-        description: 'Enterprise-ready architecture with proper error handling, SEO optimization, and security best practices built-in.'
-      }]"
-    />
+        <div class="landing__mascot">
+          <Elephant position="relative" />
+        </div>
+      </div>
 
-    <UPageSection>
-      <UPageCTA
-        title="Ready to build your next Nuxt app?"
-        description="Join thousands of developers building with Nuxt and Nuxt UI. Get this template and start shipping today."
-        variant="subtle"
-        :links="[{
-          label: 'Start building',
-          to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-          target: '_blank',
-          trailingIcon: 'i-lucide-arrow-right',
-          color: 'neutral'
-        }, {
-          label: 'View on GitHub',
-          to: 'https://github.com/nuxt-ui-templates/starter',
-          target: '_blank',
-          icon: 'i-simple-icons-github',
-          color: 'neutral',
-          variant: 'outline'
-        }]"
-      />
-    </UPageSection>
+      <!-- Scattered badges -->
+      <UBadge class="landing__badge landing__badge--1" color="success" variant="solid" size="lg">
+        Двухфакторная аутентификация
+      </UBadge>
+      <UBadge class="landing__badge landing__badge--2" color="success" variant="solid" size="lg">
+        Firewall
+      </UBadge>
+      <UBadge class="landing__badge landing__badge--3" color="success" variant="solid" size="lg">
+        DLP
+      </UBadge>
+      <UBadge class="landing__badge landing__badge--4" color="success" variant="solid" size="lg">
+        Zero Trust
+      </UBadge>
+      <UBadge class="landing__badge landing__badge--5" color="success" variant="solid" size="lg">
+        Шифрование данных
+      </UBadge>
+    </div>
+
+    <!-- CTA button -->
+    <UButton :to="ctaTo" color="neutral" size="xl" block class="landing__cta">
+      Начать игру
+    </UButton>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.landing {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &__hero {
+    position: relative;
+    background: #f1f1f1;
+    border-radius: 20px;
+    padding: 80px 60px 60px;
+    min-height: 420px;
+    overflow: hidden;
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__title {
+    font-size: 100px;
+    font-weight: 500;
+    line-height: 74px;
+    letter-spacing: -0.05em;
+    color: var(--color-neutral-900);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title-line {
+    display: block;
+
+    &--right {
+      text-align: right;
+    }
+  }
+
+  // Scattered badge positions matching the design
+  &__badge {
+    position: absolute;
+    z-index: 2;
+    font-size: 14px;
+    border-radius: 20px;
+
+    &--1 {
+      top: 40px;
+      left: 40px;
+    }
+
+    &--2 {
+      top: 30px;
+      left: 45%;
+    }
+
+    &--3 {
+      top: 50px;
+      right: 30%;
+    }
+
+    &--4 {
+      bottom: 60px;
+      left: 60px;
+    }
+
+    &--5 {
+      bottom: 40px;
+      left: 35%;
+    }
+  }
+
+  &__mascot {
+    width: 405px;
+    height: 271px;
+    flex-shrink: 0;
+  }
+
+  &__cta {
+    font-size: 18px;
+    padding: 14px 0;
+  }
+}
+</style>

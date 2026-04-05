@@ -43,3 +43,17 @@ export interface HpState {
 export interface HpHitResponse extends HpState {
   isDepleted: boolean
 }
+
+// ── Progress ──
+
+export interface LessonProgress {
+  lessonId: string
+  categoryId: string
+  completedAt: string // ISO 8601
+  attempts: number
+}
+
+export interface HpStateExtended extends HpState {
+  isDepleted: boolean
+  restoredAt: string | null // ISO 8601 или null
+}

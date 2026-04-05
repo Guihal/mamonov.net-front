@@ -18,7 +18,7 @@ export const useLogin = () => {
 
     try {
       let user: User
-
+      console.log(isBattleApi)
       if (isBattleApi) {
         user = await $fetch<User>('/auth/login', {
           method: 'POST',

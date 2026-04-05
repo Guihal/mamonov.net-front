@@ -1,9 +1,12 @@
 import { useUser } from '~/composables/user/useUser'
 import { useLogin } from '~/composables/auth/useLogin'
 import { useRegister } from '~/composables/auth/useRegister'
+import { useMockDbStore } from '~/stores/useMockDbStore'
 
 export const useAuth = () => {
   const store = useUser()
+  const config = useRuntimeConfig()
+  const isBattleApi = config.public.isBattleApi
   const { login, pending: loginPending, error: loginError } = useLogin()
   const { register, pending: registerPending, error: registerError } = useRegister()
 
@@ -14,6 +17,10 @@ export const useAuth = () => {
 
   const logout = async () => {
     console.log('[useAuth] Выход пользователя')
+    if (!isBattleApi) {
+      const db = useMockDbStore()
+      db.logoutUser()
+    }
     store.unauthorize()
     await navigateTo('/app/auth/login')
   }

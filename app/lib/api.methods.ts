@@ -4,8 +4,9 @@ import type {
   Category,
   Lesson,
   CompleteLessonResponse,
-  HpState,
-  HpHitResponse
+  HpStateExtended,
+  HpHitResponse,
+  LessonProgress
 } from './api.types'
 
 // ── Auth ──
@@ -59,7 +60,15 @@ export function completeLesson(lessonId: string) {
 // ── HP ──
 
 export function getHp(catId: string) {
-  return $fetch<HpState>(`/categories/${catId}/hp`, {
+  return $fetch<HpStateExtended>(`/categories/${catId}/hp`, {
+    credentials: 'include'
+  })
+}
+
+// ── Progress ──
+
+export function getProgress() {
+  return $fetch<LessonProgress[]>('/progress', {
     credentials: 'include'
   })
 }

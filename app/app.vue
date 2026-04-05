@@ -1,58 +1,25 @@
 <script setup lang="ts">
+const colorMode = useColorMode()
+colorMode.preference = 'light'
+
 useHead({
   meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
   link: [{ rel: 'icon', href: '/favicon.ico' }],
   htmlAttrs: {
-    lang: 'en'
+    lang: 'ru'
   }
 })
 
 useSeoMeta({
-  title: 'title',
-  description: 'description',
-  ogTitle: 'description',
-  ogDescription: 'description'
+  title: 'Мамонтов.нет — учебная платформа по кибербезопасности',
+  description: 'Обучайтесь кибербезопасности в формате интерактивных симуляций',
+  ogTitle: 'Мамонтов.нет',
+  ogDescription: 'Обучайтесь кибербезопасности в формате интерактивных симуляций'
 })
 </script>
 
 <template>
-  <UApp>
-    <UHeader>
-      <template #right>
-        <UColorModeButton />
-
-        <UButton
-          to="https://github.com/nuxt-ui-templates/starter"
-          target="_blank"
-          icon="i-simple-icons-github"
-          aria-label="GitHub"
-          color="neutral"
-          variant="ghost"
-        />
-      </template>
-    </UHeader>
-
-    <UMain>
-      <NuxtPage />
-    </UMain>
-
-    <USeparator icon="i-simple-icons-nuxtdotjs" />
-
-    <UFooter>
-      <template #left>
-        <p class="text-sm text-muted">Built with Nuxt UI • © {{ new Date().getFullYear() }}</p>
-      </template>
-
-      <template #right>
-        <UButton
-          to="https://github.com/nuxt-ui-templates/starter"
-          target="_blank"
-          icon="i-simple-icons-github"
-          aria-label="GitHub"
-          color="neutral"
-          variant="ghost"
-        />
-      </template>
-    </UFooter>
-  </UApp>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>

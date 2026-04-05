@@ -1,7 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+// Redirect to main dashboard — categories are shown there
+navigateTo('/app', { replace: true })
+</script>
 
 <template>
-  <div class=""></div>
+  <div />
 </template>
-
-<style lang="scss"></style>

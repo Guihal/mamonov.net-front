@@ -1,2 +1,6 @@
-@use "./vars" as *;
-@use "sass:map" as map;
+@use './vars' as *;
+@use 'sass:map' as map;
+
+@function c($name) {
+  @return map.get($colors, $name);
+}
