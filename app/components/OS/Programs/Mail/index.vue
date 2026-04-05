@@ -16,9 +16,9 @@ provide('mailState', mailState)
 
 <template>
   <div class="mail">
-    <OSProgramsMailMailSidebar />
-    <OSProgramsMailMailList />
-    <OSProgramsMailMailView />
+    <OSProgramsMailSidebar />
+    <OSProgramsMailList />
+    <OSProgramsMailView />
   </div>
 </template>
 

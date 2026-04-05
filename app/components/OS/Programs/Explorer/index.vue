@@ -21,13 +21,13 @@ if (explorerConfig.rootFolder) {
 
 <template>
   <div class="explorer">
-    <OSProgramsExplorerExplorerSidebar
+    <OSProgramsExplorerSidebar
       :root="filesystem"
       :current-path="currentPath"
       @navigate-to="navigateTo"
     />
     <div class="explorer__main">
-      <OSProgramsExplorerExplorerBreadcrumbs
+      <OSProgramsExplorerBreadcrumbs
         :root-name="filesystem.name"
         :current-path="currentPath"
         @navigate-to="navigateTo"

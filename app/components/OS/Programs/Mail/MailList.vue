@@ -13,7 +13,7 @@ const { folderEmails, activeEmailId, openEmail, activeFolder } = mailState
     </div>
     <div class="mail-list__items">
       <template v-if="folderEmails.length > 0">
-        <OSProgramsMailMailMessage
+        <OSProgramsMailMessage
           v-for="email in folderEmails"
           :key="email.id"
           :email="email"

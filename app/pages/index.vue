@@ -35,26 +35,7 @@ onMounted(() => {
           </UButton>
         </div>
       </div>
-
-      <!-- Scattered badges -->
-      <UBadge class="landing__badge landing__badge--1" color="success" variant="solid" size="lg">
-        Двухфакторная аутентификация
-      </UBadge>
-      <UBadge class="landing__badge landing__badge--2" color="error" variant="solid" size="lg">
-        Firewall
-      </UBadge>
-      <UBadge class="landing__badge landing__badge--3" color="success" variant="solid" size="lg">
-        DLP
-      </UBadge>
-      <UBadge class="landing__badge landing__badge--4" color="success" variant="solid" size="lg">
-        Cyberattack
-      </UBadge>
-      <UBadge class="landing__badge landing__badge--5" color="secondary" variant="solid" size="lg">
-        Шифрование данных
-      </UBadge>
     </div>
-
-    <!-- CTA button -->
   </div>
 </template>
 
@@ -132,45 +113,6 @@ main:has(.landing) {
     }
   }
 
-  // Scattered badge positions matching the design
-  &__badge {
-    position: absolute;
-    z-index: 2;
-    font-size: 14px;
-    border-radius: 20px;
-
-    &--1 {
-      top: -40px;
-      left: 0;
-      rotate: -4.64deg;
-    }
-
-    &--2 {
-      top: 0%;
-      translate: -50% calc(-80%);
-      left: 50%;
-    }
-
-    &--3 {
-      top: 0%;
-      translate: -50% calc(-80%);
-      right: 19%;
-      rotate: 15deg;
-    }
-
-    &--4 {
-      bottom: 160px;
-      right: 60%;
-      rotate: -4.64deg;
-    }
-
-    &--5 {
-      bottom: 160px;
-      right: 60px;
-      rotate: 3.64deg;
-    }
-  }
-
   &__mascot {
     width: 405px;
     height: 271px;
@@ -180,6 +122,67 @@ main:has(.landing) {
   &__cta {
     font-size: 18px;
     padding: 14px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing {
+    padding: 32px 16px;
+
+    &__hero {
+      min-height: auto;
+    }
+
+    &__heading {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+
+      &-text {
+        max-width: 100%;
+      }
+    }
+
+    &__title {
+      font-size: 56px;
+      padding-right: 0;
+    }
+
+    &__footer {
+      flex-direction: column;
+      align-items: center;
+
+      &-title {
+        font-size: 56px;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+
+      &-wrapper {
+        width: 100%;
+      }
+    }
+
+    &__mascot {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      aspect-ratio: 405 / 271;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .landing {
+    padding: 24px 12px;
+
+    &__title {
+      font-size: 40px;
+    }
+
+    &__footer-title {
+      font-size: 40px;
+    }
   }
 }
 </style>

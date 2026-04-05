@@ -50,7 +50,7 @@ const onBodyClick = (e: MouseEvent) => {
           Вложения ({{ activeEmail.attachments.length }})
         </div>
         <div class="mail-view__attachments-list">
-          <OSProgramsMailMailAttachment
+          <OSProgramsMailAttachment
             v-for="att in activeEmail.attachments"
             :key="att.id"
             :attachment="att"
