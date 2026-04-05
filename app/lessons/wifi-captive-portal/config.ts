@@ -72,17 +72,6 @@ export const captivePortalConfig: LessonConfig = {
 
   quickActions: [
     {
-      id: 'check-domain',
-      icon: 'i-lucide-shield-check',
-      label: 'Проверить домен портала',
-      visibleOnSteps: [0, 1],
-      onClick: (ctrl) => {
-        ctrl.openBrowserTab('tools://url-checker')
-        ctrl.mascot.enqueue(getMascotPhrases(ctrl).step2)
-        ctrl.goToStep(2)
-      }
-    },
-    {
       id: 'ask-staff-mall',
       icon: 'i-lucide-user-check',
       label: 'Уточнить у персонала',
@@ -125,6 +114,12 @@ export const captivePortalConfig: LessonConfig = {
 
   events: {
     browser: {
+      onUrlNavigate: (ctrl, url) => {
+        if (url === 'tools://url-checker' && ctrl.step.value < 2) {
+          ctrl.mascot.enqueue(getMascotPhrases(ctrl).step2)
+          ctrl.goToStep(2)
+        }
+      },
       onFormSubmit: (ctrl, url, data) => {
         if (!url.includes('mall-free-wifi')) return
         const isGoogle = !!(data.googleEmail || data.googlePassword)

@@ -9,7 +9,7 @@ const { tabs, activeTabId, setActiveTab, openTab, closeTab } = inject('browserTa
 <template>
   <div class="browser-tabbar">
     <div class="browser-tabbar__tabs">
-      <button
+      <div
         v-for="tab in tabs"
         :key="tab.id"
         class="browser-tabbar__tab"
@@ -18,7 +18,7 @@ const { tabs, activeTabId, setActiveTab, openTab, closeTab } = inject('browserTa
       >
         <span class="browser-tabbar__tab-title">{{ tab.title }}</span>
         <button class="browser-tabbar__tab-close" @click.stop="closeTab(tab.id)">×</button>
-      </button>
+      </div>
     </div>
     <button class="browser-tabbar__add" @click="openTab()">+</button>
   </div>

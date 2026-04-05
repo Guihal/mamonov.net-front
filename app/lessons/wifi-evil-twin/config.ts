@@ -108,12 +108,13 @@ export const evilTwinConfig: LessonConfig = {
     connectedId: 'fake-5g',
     onDisconnect: (ctrl, networkId) => {
       if (networkId === 'fake-5g') {
-        ctrl.mascot.enqueue(getMascotPhrases(ctrl).disconnected)
         ctrl.goToStep(2)
+        ctrl.mascot.enqueue(getMascotPhrases(ctrl).disconnected)
       }
     },
     onConnect: (ctrl, networkId) => {
-      if (networkId === 'real' && ctrl.step.value >= 2) {
+      if (networkId === 'real') {
+        if (ctrl.step.value < 2) ctrl.goToStep(2)
         ctrl.mascot.enqueue(getMascotPhrases(ctrl).complete)
       } else if (networkId === 'fake-5g') {
         ctrl.mascot.enqueue([
@@ -151,7 +152,7 @@ export const evilTwinConfig: LessonConfig = {
       from: 'Airport WiFi Service',
       fromEmail: 'noreply@airport-update.net',
       subject: 'Подтверждение регистрации в сети аэропорта',
-      body: 'Ваша регистрация в сети аэропорта требует подтверждения email.\n\nПерейдите по ссылке для подтверждения: http://airport-wifi-update.ru/email-confirm\n\nЕсли вы не подтверждаете регистрацию в течение 24 часов, доступ к сети будет приостановлен.',
+      body: '<p>Ваша регистрация в сети аэропорта требует подтверждения email.</p><p>Перейдите по ссылке для подтверждения: <a href="http://airport-wifi-update.ru/email-confirm">http://airport-wifi-update.ru/email-confirm</a></p><p>Если вы не подтверждаете регистрацию в течение 24 часов, доступ к сети будет приостановлен.</p>',
       date: '2026-04-05T14:25:00',
       isRead: false
     }
@@ -164,8 +165,29 @@ export const evilTwinConfig: LessonConfig = {
       label: 'Уточнить сеть у персонала',
       visibleOnSteps: [0, 1],
       onClick: (ctrl) => {
-        ctrl.mascot.enqueue(getMascotPhrases(ctrl).askStaff)
         ctrl.goToStep(2)
+        ctrl.mascot.enqueue(getMascotPhrases(ctrl).askStaff)
+      }
+    },
+    {
+      id: 'disconnect',
+      icon: 'i-lucide-wifi-off',
+      label: 'Отключиться от сети',
+      visibleOnSteps: [0, 1],
+      onClick: (ctrl) => {
+        ctrl.wifiDisconnect()
+        ctrl.goToStep(2)
+        ctrl.mascot.enqueue(getMascotPhrases(ctrl).disconnected)
+      }
+    },
+    {
+      id: 'connect-real',
+      icon: 'i-lucide-wifi',
+      label: 'Подключиться к настоящей сети',
+      visibleOnSteps: [2],
+      onClick: (ctrl) => {
+        ctrl.wifiConnect('real')
+        ctrl.mascot.enqueue(getMascotPhrases(ctrl).complete)
       }
     }
   ],

@@ -37,6 +37,7 @@ onMounted(() => {
 onUnmounted(() => {
   setIsolated(false)
   clearPinnedPrograms()
+  clearAllWindowsState()
   mascot.$reset()
 })
 </script>

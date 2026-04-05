@@ -10,5 +10,5 @@ services:
     environment:
       - NODE_ENV=production
       - NUXT_PUBLIC_IS_BATTLE_API=${NUXT_PUBLIC_IS_BATTLE_API:-}
-      - NUXT_API_BASE_URL=${NUXT_API_BASE_URL:-http://localhost:8080}
+      - NUXT_API_BASE_URL=${NUXT_API_BASE_URL:-https://ilya.burdyugov.fvds.ru}
     restart: unless-stopped

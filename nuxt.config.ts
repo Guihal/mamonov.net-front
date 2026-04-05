@@ -31,6 +31,9 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    optimizeDeps: {
+      include: ['zod']
+    },
     css: {
       preprocessorMaxWorkers: true,
       preprocessorOptions: {

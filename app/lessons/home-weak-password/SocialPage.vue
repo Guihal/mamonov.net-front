@@ -14,6 +14,8 @@ function openChangePassword() {
 
 function onFormSubmit(payload: { newPassword: string }) {
   browserEvents.onFormSubmit?.('social://mypage', payload)
+  showForm.value = false
+  showBanner.value = false
 }
 
 function onFormDismiss() {

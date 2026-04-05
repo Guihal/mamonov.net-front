@@ -30,6 +30,9 @@ onMounted(() => {
         </div>
         <div class="landing__footer-wrapper">
           <h1 class="landing__footer-title">киберзащитЫ</h1>
+          <UButton :to="ctaTo" color="neutral" size="xl" block class="landing__cta">
+            Начать игру
+          </UButton>
         </div>
       </div>
 
@@ -37,43 +40,58 @@ onMounted(() => {
       <UBadge class="landing__badge landing__badge--1" color="success" variant="solid" size="lg">
         Двухфакторная аутентификация
       </UBadge>
-      <UBadge class="landing__badge landing__badge--2" color="success" variant="solid" size="lg">
+      <UBadge class="landing__badge landing__badge--2" color="error" variant="solid" size="lg">
         Firewall
       </UBadge>
       <UBadge class="landing__badge landing__badge--3" color="success" variant="solid" size="lg">
         DLP
       </UBadge>
       <UBadge class="landing__badge landing__badge--4" color="success" variant="solid" size="lg">
-        Zero Trust
+        Cyberattack
       </UBadge>
-      <UBadge class="landing__badge landing__badge--5" color="success" variant="solid" size="lg">
+      <UBadge class="landing__badge landing__badge--5" color="secondary" variant="solid" size="lg">
         Шифрование данных
       </UBadge>
     </div>
 
     <!-- CTA button -->
-    <UButton :to="ctaTo" color="neutral" size="xl" block class="landing__cta">
-      Начать игру
-    </UButton>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
+main:has(.landing) {
+  min-height: 100% !important;
+}
+
 .landing {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 80px;
+  padding: 80px 80px;
   display: flex;
   flex-direction: column;
   gap: 24px;
 
   &__hero {
     position: relative;
-    background: #f1f1f1;
-    border-radius: 20px;
-    padding: 80px 60px 60px;
+
+    padding: 0;
     min-height: 420px;
-    overflow: hidden;
+  }
+
+  &__footer {
+    display: flex;
+    gap: 20px;
+
+    &-title {
+      font-weight: 500;
+      font-size: 140px;
+      line-height: 80%;
+      letter-spacing: -0.05em;
+      color: #000;
+      font-family: 'PixCyrillic', sans-serif;
+      margin-bottom: 60px;
+      position: relative;
+    }
   }
 
   &__heading {
@@ -81,18 +99,29 @@ onMounted(() => {
     align-items: center;
     position: relative;
     z-index: 1;
+
+    &-text {
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 106%;
+      color: #000;
+      max-width: 320px;
+    }
   }
 
   &__title {
-    font-size: 100px;
     font-weight: 500;
-    line-height: 74px;
-    letter-spacing: -0.05em;
+    font-size: 140px;
+    line-height: 80%;
+    letter-spacing: -0.07em;
+    text-align: left;
     color: var(--color-neutral-900);
     display: flex;
     flex-direction: column;
     flex: 1;
     min-width: 0;
+
+    padding-right: 20px;
   }
 
   &__title-line {
@@ -111,28 +140,34 @@ onMounted(() => {
     border-radius: 20px;
 
     &--1 {
-      top: 40px;
-      left: 40px;
+      top: -40px;
+      left: 0;
+      rotate: -4.64deg;
     }
 
     &--2 {
-      top: 30px;
-      left: 45%;
+      top: 0%;
+      translate: -50% calc(-80%);
+      left: 50%;
     }
 
     &--3 {
-      top: 50px;
-      right: 30%;
+      top: 0%;
+      translate: -50% calc(-80%);
+      right: 19%;
+      rotate: 15deg;
     }
 
     &--4 {
-      bottom: 60px;
-      left: 60px;
+      bottom: 160px;
+      right: 60%;
+      rotate: -4.64deg;
     }
 
     &--5 {
-      bottom: 40px;
-      left: 35%;
+      bottom: 160px;
+      right: 60px;
+      rotate: 3.64deg;
     }
   }
 

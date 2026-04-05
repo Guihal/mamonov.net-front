@@ -170,15 +170,17 @@ const phishingMessageConfig: LessonConfig = {
         if (url.includes('bit.ly') || url.includes('fake-yourbank')) {
           ctrl.mascot.enqueue(getMascotPhrases(ctrl).failUrlNavigate)
           ctrl.fail('Вы открыли фишинговый сайт!')
-          return
-        }
-        if (url === 'tools://url-checker' && ctrl.step.value < 2) {
-          ctrl.goToStep(2)
-          ctrl.mascot.enqueue(getMascotPhrases(ctrl).urlCheckerResult)
         }
       },
-      onFormSubmit: (ctrl, url, _data) => {
-        if (url.includes('url-checker')) return
+      onFormSubmit: (ctrl, url, data) => {
+        if (url.includes('url-checker')) {
+          const checkedUrl = data.url ?? ''
+          if (checkedUrl && /bit\.ly|fake|phishing/i.test(checkedUrl) && ctrl.step.value < 2) {
+            ctrl.goToStep(2)
+            ctrl.mascot.enqueue(getMascotPhrases(ctrl).urlCheckerResult)
+          }
+          return
+        }
         ctrl.mascot.enqueue(getMascotPhrases(ctrl).failFormSubmit)
         ctrl.fail('Вы ввели данные на фишинговом сайте!')
       }

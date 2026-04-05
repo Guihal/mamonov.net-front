@@ -12,7 +12,7 @@ export function useSetFullscreenObserver(windowOb: WindowOb) {
 
   useSetChainedWatchers(
     () => windowOb.states.fullscreen === true,
-    () => contentArea,
+    contentArea,
     () => {
       useOnFullscreen(windowOb, !isMounted)
     },
