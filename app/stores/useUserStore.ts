@@ -1,7 +1,11 @@
 import type { HpHitResponse, LessonProgress } from '~/lib/api.types'
+import * as api from '~/lib/api.methods'
 import { useMockDbStore } from '~/stores/useMockDbStore'
 
 export const useUserStore = defineStore('userGame', () => {
+  const config = useRuntimeConfig()
+  const isBattleApi = config.public.isBattleApi
+
   // ── State ──
   const hp = ref(3)
   const maxHp = ref(3)
@@ -35,12 +39,18 @@ export const useUserStore = defineStore('userGame', () => {
   async function syncHp(categoryId: string) {
     currentCategoryId.value = categoryId
     try {
-      // TODO: заменить на реальный API
-      const db = useMockDbStore()
-      const data = db.getHp(categoryId)
-      hp.value = data.current
-      maxHp.value = data.max
-      restoredAt.value = data.restoredAt
+      if (isBattleApi) {
+        const data = await api.getHp(categoryId)
+        hp.value = data.current
+        maxHp.value = data.max
+        restoredAt.value = data.restoredAt
+      } else {
+        const db = useMockDbStore()
+        const data = db.getHp(categoryId)
+        hp.value = data.current
+        maxHp.value = data.max
+        restoredAt.value = data.restoredAt
+      }
     } catch (e) {
       console.error('[useUserStore] syncHp failed:', e)
     }
@@ -58,15 +68,24 @@ export const useUserStore = defineStore('userGame', () => {
       return null
     }
     try {
-      // TODO: заменить на реальный API
-      const db = useMockDbStore()
-      const data = db.hitHp(catId)
-      hp.value = data.current
-      maxHp.value = data.max
-      if (data.isDepleted) {
-        restoredAt.value = new Date(Date.now() + 30 * 60_000).toISOString()
+      if (isBattleApi) {
+        const data = await api.hitHp(catId)
+        hp.value = data.current
+        maxHp.value = data.max
+        if (data.isDepleted) {
+          restoredAt.value = new Date(Date.now() + 30 * 60_000).toISOString()
+        }
+        return data
+      } else {
+        const db = useMockDbStore()
+        const data = db.hitHp(catId)
+        hp.value = data.current
+        maxHp.value = data.max
+        if (data.isDepleted) {
+          restoredAt.value = new Date(Date.now() + 30 * 60_000).toISOString()
+        }
+        return data
       }
-      return data
     } catch (e) {
       console.error('[useUserStore] hitHp failed:', e)
       return null
@@ -78,9 +97,12 @@ export const useUserStore = defineStore('userGame', () => {
    */
   async function syncProgress() {
     try {
-      // TODO: заменить на реальный API
-      const db = useMockDbStore()
-      progress.value = db.getProgress()
+      if (isBattleApi) {
+        progress.value = await api.getProgress()
+      } else {
+        const db = useMockDbStore()
+        progress.value = db.getProgress()
+      }
     } catch (e) {
       console.error('[useUserStore] syncProgress failed:', e)
     }
@@ -94,9 +116,10 @@ export const useUserStore = defineStore('userGame', () => {
   }
 
   /**
-   * Добавить урок в прогресс (локально, после POST /lessons/:id/complete).
+   * Отметить урок как завершённый.
+   * При isBattleApi — вызывает POST /lessons/:id/complete на сервер.
    */
-  function markLessonCompleted(lessonId: string, categoryId: string) {
+  async function markLessonCompleted(lessonId: string, categoryId: string) {
     if (isLessonCompleted(lessonId)) return
     progress.value.push({
       lessonId,
@@ -104,11 +127,19 @@ export const useUserStore = defineStore('userGame', () => {
       completedAt: new Date().toISOString(),
       attempts: 1
     })
+
+    if (isBattleApi) {
+      try {
+        await api.completeLesson(lessonId)
+      } catch (e) {
+        console.error('[useUserStore] markLessonCompleted API call failed:', e)
+      }
+    } else {
+      const db = useMockDbStore()
+      db.completeLesson(lessonId)
+    }
   }
 
-  /**
-   * Сброс стора (при логауте или смене пользователя).
-   */
   function tickTimer() {
     _tick.value++
   }

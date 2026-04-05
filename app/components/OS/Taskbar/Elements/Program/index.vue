@@ -3,6 +3,7 @@ import type { WindowOb } from '~/components/OS/Window/Window'
 import type { ProgramType } from '~~/shared/types/Program'
 import { debounce } from '~/components/OS/Window/utils/debounce'
 import { PROGRAMS } from '~/utils/PROGRAMS'
+import { useCreateAndRegisterWindow } from '~/components/OS/Window/composables/useCreateAndRegisterWindow'
 
 const { programType, windowObs, isPinned } = defineProps<{
   programType: ProgramType
@@ -19,6 +20,8 @@ const hasOpenWindows = computed(() => windowObs.length > 0)
 
 const { focus } = useFocusWindowController()
 const { register, unregister, setContainer, show, hide, updateWindowObs } = useTaskbarTooltips()
+
+const pinnedStartPaths = inject<Partial<Record<ProgramType, string>>>('pinnedStartPaths', {})
 
 const container = ref<HTMLElement | null>(null)
 const currentIndex = ref(0)
@@ -60,6 +63,11 @@ watch(
 const onClick = debounce(() => {
   if (hasOpenWindows.value) {
     currentIndex.value++
+  } else if (isPinned) {
+    const program = PROGRAMS[programType]
+    if (!program) return
+    const startPath = pinnedStartPaths[programType] ?? `/${programType}`
+    useCreateAndRegisterWindow({ name: program.label, programType, path: startPath })
   }
 }, 50)
 

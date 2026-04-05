@@ -80,3 +80,15 @@ export function hitHp(categoryId: string) {
     credentials: 'include'
   })
 }
+
+export function getGameProgress() {
+  return $fetch<import('./api.types').GameProgress>('/categories/game/progress', {
+    credentials: 'include'
+  })
+}
+
+export function getCategory(catId: string) {
+  return $fetch<Category>(`/categories/${catId}`, {
+    credentials: 'include'
+  })
+}

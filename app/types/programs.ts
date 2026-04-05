@@ -48,6 +48,7 @@ export interface BrowserEvents {
   onTabClose?: (url: string) => void
   onPopupDownloadClick?: () => void
   onPopupRemindClick?: () => void
+  onPopupClose?: () => void
 }
 
 // --- Messenger ---

@@ -106,7 +106,10 @@ export function useMessengerState(events?: MessengerEvents) {
 
   const addChats = (newChats: ChatConfig[]) => {
     for (const chat of newChats) {
-      if (!chats.value.find((c) => c.id === chat.id)) {
+      const existingIndex = chats.value.findIndex((c) => c.id === chat.id)
+      if (existingIndex !== -1) {
+        chats.value[existingIndex] = deepClone(chat)
+      } else {
         chats.value.push(deepClone(chat))
       }
     }
@@ -124,7 +127,7 @@ export function useMessengerState(events?: MessengerEvents) {
   }
 
   return {
-    chats: readonly(chats),
+    chats,
     activeChatId: readonly(activeChatId),
     activeChat,
     selectChat,

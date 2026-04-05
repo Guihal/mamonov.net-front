@@ -33,20 +33,18 @@ function scheduleHide() {
   <div
     v-if="actions.length"
     class="quick-actions"
+    :class="{ 'quick-actions--open': isOpen }"
     @mouseenter="showMenu"
     @mouseleave="scheduleHide"
   >
+    <div class="quick-actions__menu-wrap">
+      <OSQuickActionsMenu :actions="actions" />
+    </div>
     <div class="quick-actions__trigger">
       <span v-for="(letter, i) in 'ДЕЙСТВИЯ'.split('')" :key="i" class="quick-actions__letter">
         {{ letter }}
       </span>
     </div>
-
-    <Transition name="qa-slide">
-      <div v-if="isOpen" class="quick-actions__menu-wrap">
-        <OSQuickActionsMenu :actions="actions" />
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -59,7 +57,7 @@ function scheduleHide() {
   z-index: 200;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
 
   &__trigger {
     display: flex;
@@ -73,6 +71,8 @@ function scheduleHide() {
     cursor: default;
     user-select: none;
     gap: 3px;
+    position: relative;
+    z-index: 1;
   }
 
   &__letter {
@@ -86,23 +86,19 @@ function scheduleHide() {
   }
 
   &__menu-wrap {
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
+    overflow: hidden;
+    max-width: 0;
+    transition: max-width 0.22s ease;
+    display: flex;
+    align-items: stretch;
+
+    .qa-menu {
+      flex: 1;
+    }
   }
-}
 
-.qa-slide-enter-active,
-.qa-slide-leave-active {
-  transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
-}
-
-.qa-slide-enter-from,
-.qa-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-50%) translateX(-8px);
+  &--open &__menu-wrap {
+    max-width: 300px;
+  }
 }
 </style>

@@ -1,16 +1,19 @@
 <script setup lang="ts">
+import { useOsIsolated } from '~/composables/os/useOsIsolated'
+
 const emit = defineEmits<{ close: [] }>()
 const route = useRoute()
 const router = useRouter()
 
 const onExit = () => {
-  const categorySlug = route.params.category as string | undefined
-  if (categorySlug) {
-    router.push(`/app/${categorySlug}`)
-  } else {
-    router.push('/app')
-  }
+  const { setIsolated } = useOsIsolated()
+  setIsolated(false)
+
+  const categorySlug = route.params.categorySlug as string | undefined
+  const target = categorySlug ? `/app/categories/${categorySlug}` : '/app'
+
   emit('close')
+  router.push(target)
 }
 </script>
 

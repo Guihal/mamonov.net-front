@@ -50,6 +50,8 @@ watch(
   box-sizing: border-box;
 
   &__wrapper {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     max-width: 100%;

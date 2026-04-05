@@ -1,14 +1,22 @@
 <script setup lang="ts">
+import type { Category, Lesson } from '~/lib/api.types'
 import { useMockDbStore } from '~/stores/useMockDbStore'
 import { useUserStore } from '~/stores/useUserStore'
+
+definePageMeta({ layout: 'default' })
+
+const config = useRuntimeConfig()
+const isBattleApi = config.public.isBattleApi
 
 const route = useRoute()
 const db = useMockDbStore()
 const gameStore = useUserStore()
 
-const categorySlug = computed(() => route.params.categorySlug as string)
-const category = computed(() => db.getCategoryBySlug(categorySlug.value))
-const lessons = computed(() => (category.value ? db.getLessons(category.value.id) : []))
+const CATEGORY_ICONS: Record<string, string> = {
+  office: 'lucide:building-2',
+  home: 'lucide:house',
+  'public-wifi': 'lucide:wifi'
+}
 
 const LESSON_ICONS: Record<string, string> = {
   'office-phishing-message': 'i-lucide-message-square',
@@ -26,25 +34,116 @@ function getLessonIcon(lessonId: string): string {
   return LESSON_ICONS[lessonId] ?? 'i-lucide-shield'
 }
 
-function getLessonStatus(lesson: {
+// ── Unified display interfaces ──
+interface DisplayLesson {
+  id: string
   slug: string
+  title: string
   isCompleted: boolean
-}): 'completed' | 'unlocked' | 'locked' {
-  if (!category.value) return 'locked'
+  description?: string
+}
+
+interface DisplayCategory {
+  id: string
+  slug: string
+  name: string
+  icon: string
+  progress: number
+}
+
+// ── State ──
+const categorySlug = computed(() => route.params.categorySlug as string)
+
+// Real API state
+const apiCategory = ref<DisplayCategory | null>(null)
+const apiLessons = ref<DisplayLesson[]>([])
+
+// Unified accessors
+const category = computed<DisplayCategory | null>(() => {
+  if (isBattleApi) return apiCategory.value
+  const c = db.getCategoryBySlug(categorySlug.value)
+  if (!c) return null
+  return {
+    id: c.id,
+    slug: c.slug,
+    name: c.name,
+    icon: c.icon,
+    progress: db.getCategoryProgress(c.id)
+  }
+})
+
+const lessons = computed<DisplayLesson[]>(() => {
+  if (isBattleApi) return apiLessons.value
+  if (!category.value) return []
+  return db.getLessons(category.value.id).map((l) => ({
+    id: l.id,
+    slug: l.slug,
+    title: l.title,
+    isCompleted: l.isCompleted,
+    description: l.description
+  }))
+})
+
+const categoryProgress = computed(() => {
+  if (isBattleApi) return apiCategory.value?.progress ?? 0
+  if (!category.value) return 0
+  return db.getCategoryProgress(category.value.id)
+})
+
+function isLessonUnlocked(lessonId: string): boolean {
+  const lst = lessons.value
+  const idx = lst.findIndex((l) => l.id === lessonId)
+  if (idx === 0) return true
+  return idx > 0 && (lst[idx - 1]?.isCompleted ?? false)
+}
+
+function getLessonStatus(lesson: DisplayLesson): 'completed' | 'unlocked' | 'locked' {
   if (lesson.isCompleted) return 'completed'
-  if (db.isLessonUnlocked(category.value.id, lesson.slug)) return 'unlocked'
+  if (isLessonUnlocked(lesson.id)) return 'unlocked'
   return 'locked'
 }
 
 onMounted(async () => {
-  if (category.value) {
-    await gameStore.syncHp(category.value.id)
+  const slug = categorySlug.value
+
+  if (isBattleApi) {
+    try {
+      const [cat, ls] = await Promise.all([
+        $fetch<Category>(`/categories/${slug}`, { credentials: 'include' }),
+        $fetch<Lesson[]>(`/categories/${slug}/lessons`, { credentials: 'include' })
+      ])
+
+      apiCategory.value = {
+        id: cat.id,
+        slug: cat.id,
+        name: cat.name,
+        icon: CATEGORY_ICONS[cat.id] ?? 'lucide:shield',
+        progress: cat.progress
+      }
+
+      apiLessons.value = ls.map((l) => ({
+        id: l.id,
+        slug: l.id,
+        title: l.title,
+        isCompleted: l.isCompleted
+      }))
+
+      await gameStore.syncHp(slug)
+    } catch (e) {
+      console.error('[categoryPage] Failed to load data:', e)
+      await navigateTo('/app')
+    }
+  } else {
+    const cat = db.getCategoryBySlug(slug)
+    if (cat) {
+      await gameStore.syncHp(cat.id)
+    }
   }
 })
 
-// Redirect if category not found
+// Redirect if category not found (mock mode)
 watchEffect(() => {
-  if (import.meta.client && !category.value) {
+  if (import.meta.client && !isBattleApi && !category.value) {
     navigateTo('/app')
   }
 })
@@ -76,11 +175,7 @@ watchEffect(() => {
         <UIcon name="i-lucide-star" class="category-page__progress-icon" />
         <span class="category-page__progress-label">Пройдено уровней</span>
       </div>
-      <UProgress
-        :model-value="Math.round(db.getCategoryProgress(category.id) * 100)"
-        size="md"
-        color="primary"
-      />
+      <UProgress :model-value="Math.round(categoryProgress * 100)" size="md" color="primary" />
     </div>
 
     <!-- Lessons List -->
@@ -119,7 +214,7 @@ watchEffect(() => {
             <span class="lesson-item__number">{{ i + 1 }}</span>
             <span class="lesson-item__title">{{ lesson.title }}</span>
           </div>
-          <p class="lesson-item__desc">
+          <p v-if="lesson.description" class="lesson-item__desc">
             {{ lesson.description }}
           </p>
         </div>

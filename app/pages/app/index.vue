@@ -1,33 +1,25 @@
 <script setup lang="ts">
+import type { Category, Lesson, GameProgress } from '~/lib/api.types'
 import { useMockDbStore } from '~/stores/useMockDbStore'
 import { useUser } from '~/composables/user/useUser'
 import { useUserStore } from '~/stores/useUserStore'
+
+definePageMeta({ layout: 'default' })
+
+const config = useRuntimeConfig()
+const isBattleApi = config.public.isBattleApi
 
 const db = useMockDbStore()
 const userStore = useUser()
 const gameStore = useUserStore()
 
-const categories = computed(() => db.getCategories())
+// ── Local icon map for real API (backend has no icons) ──
+const CATEGORY_ICONS: Record<string, string> = {
+  office: 'lucide:building-2',
+  home: 'lucide:house',
+  'public-wifi': 'lucide:wifi'
+}
 
-const user = computed(() => userStore.user)
-
-const totalLessons = computed(() => {
-  let total = 0
-  let completed = 0
-  for (const cat of categories.value) {
-    const lessons = db.getLessons(cat.id)
-    total += lessons.length
-    completed += lessons.filter((l) => l.isCompleted).length
-  }
-  return { total, completed }
-})
-
-const levelsPercent = computed(() => {
-  const { total, completed } = totalLessons.value
-  return total > 0 ? Math.round((completed / total) * 100) : 0
-})
-
-// Icon mapping for lessons
 const LESSON_ICONS: Record<string, string> = {
   'office-phishing-message': 'i-lucide-message-square',
   'office-phishing-email': 'i-lucide-mail',
@@ -44,25 +36,141 @@ function getLessonIcon(lessonId: string): string {
   return LESSON_ICONS[lessonId] ?? 'i-lucide-shield'
 }
 
+// ── Unified display interfaces ──
+interface DisplayLesson {
+  id: string
+  slug: string
+  title: string
+  isCompleted: boolean
+}
+
+interface DisplayCategory {
+  id: string
+  slug: string
+  name: string
+  icon: string
+  progress: number
+}
+
+// ── Reactive state for real API ──
+const apiCategories = ref<DisplayCategory[]>([])
+const apiLessonsMap = ref<Record<string, DisplayLesson[]>>({})
+const totalCompletedLessons = ref(0)
+const totalLessonsCount = ref(0)
+
+// ── Unified accessors ──
+
+const categories = computed<DisplayCategory[]>(() => {
+  if (isBattleApi) return apiCategories.value
+  return db.getCategories().map((c) => ({
+    id: c.id,
+    slug: c.slug,
+    name: c.name,
+    icon: c.icon,
+    progress: db.getCategoryProgress(c.id)
+  }))
+})
+
+function getLessonsFor(catId: string): DisplayLesson[] {
+  if (isBattleApi) {
+    return apiLessonsMap.value[catId] ?? []
+  }
+  return db.getLessons(catId).map((l) => ({
+    id: l.id,
+    slug: l.slug,
+    title: l.title,
+    isCompleted: l.isCompleted
+  }))
+}
+
+function getCategoryProgress(catId: string): number {
+  if (isBattleApi) {
+    return apiCategories.value.find((c) => c.id === catId)?.progress ?? 0
+  }
+  return db.getCategoryProgress(catId)
+}
+
+function isLessonUnlocked(catId: string, lessonId: string): boolean {
+  const lst = getLessonsFor(catId)
+  const idx = lst.findIndex((l) => l.id === lessonId)
+  if (idx === 0) return true
+  return idx > 0 && (lst[idx - 1]?.isCompleted ?? false)
+}
+
 function getLessonStatus(
-  categoryId: string,
-  lesson: { id: string; slug: string; isCompleted: boolean }
+  catId: string,
+  lesson: DisplayLesson
 ): 'completed' | 'unlocked' | 'locked' {
   if (lesson.isCompleted) return 'completed'
-  if (db.isLessonUnlocked(categoryId, lesson.slug)) return 'unlocked'
+  if (isLessonUnlocked(catId, lesson.id)) return 'unlocked'
   return 'locked'
 }
 
-function getNextLesson(categoryId: string) {
-  const lessons = db.getLessons(categoryId)
-  return lessons.find((l) => !l.isCompleted && db.isLessonUnlocked(categoryId, l.slug))
+function getNextLesson(catId: string): DisplayLesson | undefined {
+  return getLessonsFor(catId).find((l) => !l.isCompleted && isLessonUnlocked(catId, l.id))
 }
 
+const levelsPercent = computed(() => {
+  if (isBattleApi) {
+    return totalLessonsCount.value > 0
+      ? Math.round((totalCompletedLessons.value / totalLessonsCount.value) * 100)
+      : 0
+  }
+  let total = 0
+  let completed = 0
+  for (const cat of db.getCategories()) {
+    const lessons = db.getLessons(cat.id)
+    total += lessons.length
+    completed += lessons.filter((l) => l.isCompleted).length
+  }
+  return total > 0 ? Math.round((completed / total) * 100) : 0
+})
+
+const user = computed(() => userStore.user)
+
 onMounted(async () => {
-  await gameStore.syncProgress()
-  // Sync HP for all categories
-  for (const cat of categories.value) {
-    await gameStore.syncHp(cat.id)
+  if (isBattleApi) {
+    try {
+      const [cats, gp] = await Promise.all([
+        $fetch<Category[]>('/categories', { credentials: 'include' }),
+        $fetch<GameProgress>('/categories/game/progress', { credentials: 'include' })
+      ])
+
+      apiCategories.value = cats.map((c) => ({
+        id: c.id,
+        slug: c.id,
+        name: c.name,
+        icon: CATEGORY_ICONS[c.id] ?? 'lucide:shield',
+        progress: c.progress
+      }))
+
+      totalCompletedLessons.value = gp.completed_lessons
+      totalLessonsCount.value = gp.total_lessons
+
+      const lessonResults = await Promise.all(
+        cats.map((c) =>
+          $fetch<Lesson[]>(`/categories/${c.id}/lessons`, { credentials: 'include' }).then(
+            (ls) => [c.id, ls] as const
+          )
+        )
+      )
+
+      for (const [catId, ls] of lessonResults) {
+        apiLessonsMap.value[catId] = ls.map((l) => ({
+          id: l.id,
+          slug: l.id,
+          title: l.title,
+          isCompleted: l.isCompleted
+        }))
+      }
+    } catch (e) {
+      console.error('[dashboard] Failed to load data:', e)
+    }
+  } else {
+    await gameStore.syncProgress()
+    for (const cat of db.getCategories()) {
+      await gameStore.syncHp(cat.id)
+    }
   }
 })
 </script>
@@ -72,7 +180,7 @@ onMounted(async () => {
     <!-- Profile Section -->
     <section class="profile-card">
       <div class="profile-card__avatar-area">
-        <img src="/img/elephant_nacked.avif" alt="Маскот" class="profile-card__elephant" />
+        <Elephant position="relative" />
       </div>
 
       <div class="profile-card__info">
@@ -127,7 +235,7 @@ onMounted(async () => {
               <span class="category-card__progress-label">Пройдено уровней</span>
             </div>
             <UProgress
-              :model-value="Math.round(db.getCategoryProgress(category.id) * 100)"
+              :model-value="Math.round(getCategoryProgress(category.id) * 100)"
               size="md"
               color="primary"
             />
@@ -136,7 +244,7 @@ onMounted(async () => {
           <!-- Stepper: lessons list -->
           <div class="category-card__stepper">
             <div
-              v-for="(lesson, i) in db.getLessons(category.id)"
+              v-for="(lesson, i) in getLessonsFor(category.id)"
               :key="lesson.id"
               class="stepper-item"
               :class="{
@@ -165,14 +273,14 @@ onMounted(async () => {
                 variant="subtle"
                 class="stepper-item__badge"
               >
-                Продолжить игру
+                {{ getCategoryProgress(category.id) > 0 ? 'Продолжить игру' : 'Начать' }}
               </UBadge>
               <UBadge v-else color="neutral" variant="outline" class="stepper-item__badge">
                 Уровень закрыт
               </UBadge>
 
               <div
-                v-if="i < db.getLessons(category.id).length - 1"
+                v-if="i < getLessonsFor(category.id).length - 1"
                 class="stepper-item__separator"
               />
             </div>
@@ -188,10 +296,10 @@ onMounted(async () => {
             class="category-card__action"
           >
             <UIcon name="i-lucide-rocket" />
-            Продолжить игру
+            {{ getCategoryProgress(category.id) > 0 ? 'Продолжить игру' : 'Начать игру' }}
           </UButton>
           <UButton
-            v-else-if="db.getCategoryProgress(category.id) === 1"
+            v-else-if="getCategoryProgress(category.id) === 1"
             color="neutral"
             size="xl"
             block
@@ -229,19 +337,13 @@ onMounted(async () => {
   &__avatar-area {
     flex-shrink: 0;
     width: 310px;
-    height: 300px;
     background: #6c5197;
     border-radius: 10px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
     overflow: hidden;
-  }
-
-  &__elephant {
-    width: 260px;
-    height: auto;
-    object-fit: contain;
+    padding: 16px 16px 0;
   }
 
   &__info {

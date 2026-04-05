@@ -8,8 +8,20 @@ const messengerState = inject('messengerState') as ReturnType<typeof useMessenge
 
 const formattedTime = computed(() => {
   if (!props.message.timestamp) return ''
+  if (/^\d{1,2}:\d{2}$/.test(props.message.timestamp)) return props.message.timestamp
   const d = new Date(props.message.timestamp)
+  if (isNaN(d.getTime())) return ''
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+})
+
+const URL_RE = /(https?:\/\/[^\s<]+)/g
+
+const renderedHtml = computed(() => {
+  const escaped = props.message.text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  return escaped.replace(URL_RE, '<a href="$1">$1</a>')
 })
 
 const handleClick = (e: MouseEvent) => {
@@ -36,7 +48,7 @@ const handleClick = (e: MouseEvent) => {
 
     <div class="chat-message__bubble">
       <span v-if="!message.isOwn" class="chat-message__sender">{{ message.sender }}</span>
-      <span class="chat-message__text">{{ message.text }}</span>
+      <span class="chat-message__text" v-html="renderedHtml" />
       <span v-if="formattedTime" class="chat-message__time">{{ formattedTime }}</span>
     </div>
   </div>
@@ -87,6 +99,16 @@ const handleClick = (e: MouseEvent) => {
 
     .chat-message--own & {
       color: #fff;
+    }
+
+    a {
+      color: #3b82f6;
+      text-decoration: underline;
+      cursor: pointer;
+
+      .chat-message--own & {
+        color: #bfdbfe;
+      }
     }
   }
 

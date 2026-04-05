@@ -69,6 +69,7 @@ const news = [
     <Transition name="popup-fade">
       <div v-if="popupVisible" class="scam-overlay">
         <div class="scam-popup">
+          <button class="scam-popup__close" @click="browserEvents.onPopupClose?.()">×</button>
           <div class="scam-popup__icon">⚠️</div>
           <h2 class="scam-popup__title">Ваш Flash Player версии 11.2 УСТАРЕЛ!</h2>
           <p class="scam-popup__subtitle">
@@ -208,6 +209,29 @@ const news = [
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  position: relative;
+
+  &__close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition:
+      color 0.15s,
+      background 0.15s;
+
+    &:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
 
   &__icon {
     font-size: 48px;

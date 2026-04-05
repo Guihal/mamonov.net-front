@@ -1,0 +1,12 @@
+node_modules
+.output
+.nuxt
+.git
+.github
+.vscode
+*.md
+docs
+.env*
+dist
+coverage
+.idea

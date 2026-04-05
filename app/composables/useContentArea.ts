@@ -1,4 +1,7 @@
-const viewport = ref({ width: 0, height: 0 })
+const viewport = ref({
+  width: typeof window !== 'undefined' ? window.innerWidth : 0,
+  height: typeof window !== 'undefined' ? window.innerHeight : 0
+})
 
 const taskbarHeight = ref(0)
 
@@ -14,17 +17,16 @@ const contentArea: ContentArea = computed(() => ({
   height: viewport.value.height - taskbarHeight.value
 }))
 
-let setViewportObserverInitialised = false
+let viewportObserver: ResizeObserver | null = null
 
 const setViewportObserver = () => {
-  if (setViewportObserverInitialised) return
-  setViewportObserverInitialised = true
+  if (viewportObserver) return
 
   onMounted(() => {
     const element = document.documentElement
     if (!element) return
 
-    const observer = new ResizeObserver((entries) => {
+    viewportObserver = new ResizeObserver((entries) => {
       const rect = entries[0]?.contentRect
       if (!rect) return
 
@@ -32,29 +34,34 @@ const setViewportObserver = () => {
       viewport.value.height = rect.height
     })
 
-    observer.observe(element)
+    viewportObserver.observe(element)
 
-    onBeforeUnmount(() => observer.disconnect())
+    onBeforeUnmount(() => {
+      viewportObserver?.disconnect()
+      viewportObserver = null
+    })
   })
 }
 
-let setTaskbarObserverInitialised = false
+let taskbarObserver: ResizeObserver | null = null
 
 const setTaskbarObserver = (elementRef: Ref<HTMLElement | null>) => {
-  if (setTaskbarObserverInitialised) return
-  setTaskbarObserverInitialised = true
+  if (taskbarObserver) return
 
   onMounted(() => {
     if (!elementRef.value) return
 
-    const observer = new ResizeObserver((entries) => {
+    taskbarObserver = new ResizeObserver((entries) => {
       const height = entries[0]?.contentRect.height
       if (height === undefined) return
       taskbarHeight.value = height
     })
 
-    observer.observe(elementRef.value)
-    onBeforeUnmount(() => observer.disconnect())
+    taskbarObserver.observe(elementRef.value)
+    onBeforeUnmount(() => {
+      taskbarObserver?.disconnect()
+      taskbarObserver = null
+    })
   })
 }
 

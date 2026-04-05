@@ -3,11 +3,14 @@ import type { BrowserEvents } from '~/types/programs'
 
 const browserEvents = inject<BrowserEvents>('browserEvents', {})
 
+/** Дополнительные паттерны из конфига урока (provide('urlCheckerPatterns', [...])) */
+const extraPatterns = inject<RegExp[]>('urlCheckerPatterns', [])
+
 const url = ref('')
 const checked = ref(false)
 const isSafe = ref(true)
 
-const SUSPICIOUS_PATTERNS = [
+const SUSPICIOUS_PATTERNS: RegExp[] = [
   /phishing/i,
   /fake/i,
   /malware/i,
@@ -18,7 +21,19 @@ const SUSPICIOUS_PATTERNS = [
   /login-verify/i,
   /update-flash-now/i,
   /bit\.ly/i,
-  /tinyurl/i
+  /tinyurl/i,
+  // Wi-Fi уроки
+  /airport-wifi-update/i,
+  /mall-free-wifi-auth/i,
+  /update-router-now/i,
+  /domru-update/i,
+  // Офисные уроки
+  /corp-portall/i,
+  /corp-hr-update/i,
+  // Общие эвристики
+  /-update\.(ru|com|net)/i,
+  /\/confirm\b/i,
+  /\/email-confirm\b/i
 ]
 
 function checkUrl() {
@@ -26,7 +41,8 @@ function checkUrl() {
   if (!input) return
 
   checked.value = true
-  isSafe.value = !SUSPICIOUS_PATTERNS.some((p) => p.test(input))
+  const allPatterns = [...SUSPICIOUS_PATTERNS, ...extraPatterns]
+  isSafe.value = !allPatterns.some((p) => p.test(input))
   browserEvents.onFormSubmit?.('tools://url-checker', { url: input })
 }
 </script>

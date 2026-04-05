@@ -45,7 +45,8 @@ const EYELID_OFFSETS: Record<string, { top: number; left: number }> = {
 }
 
 const eyeStyle = computed(() => {
-  const pos = EYE_POSITIONS[props.side][props.emotion]
+  const pos = EYE_POSITIONS[props.side]?.[props.emotion]
+  if (!pos) return {}
   return {
     left: `${(pos.x / BASE_W) * 100}%`,
     top: `${(pos.y / BASE_H) * 100}%`,
@@ -54,16 +55,17 @@ const eyeStyle = computed(() => {
 })
 
 const pupilStyle = computed(() => {
-  const size = PUPIL_SIZES[props.emotion][props.side]
+  const size = PUPIL_SIZES[props.emotion]?.[props.side] ?? 20
   const sizePercent = `${(size / EYE_SIZE) * 100}%`
 
   if (props.emotion === 'worried') {
     const offset = WORRIED_OFFSETS[props.side]
+    if (!offset) return { width: sizePercent }
     return {
       width: sizePercent,
       left: `${(offset.x / EYE_SIZE) * 100}%`,
       top: `${(offset.y / EYE_SIZE) * 100}%`,
-      transform: 'none'
+      transform: `translate(${props.translateX}%, ${props.translateY}%)`
     }
   }
 
@@ -72,7 +74,7 @@ const pupilStyle = computed(() => {
       width: sizePercent,
       left: '50%',
       top: '50%',
-      transform: 'translate(-50%, -50%)'
+      transform: `translate(calc(-50% + ${props.translateX}%), calc(-50% + ${props.translateY}%))`
     }
   }
 
@@ -86,6 +88,7 @@ const pupilStyle = computed(() => {
 
 const eyelidStyle = computed(() => {
   const offset = EYELID_OFFSETS[props.side]
+  if (!offset) return {}
   return {
     width: `${(60 / EYE_SIZE) * 100}%`,
     height: `${(27 / EYE_SIZE) * 100}%`,

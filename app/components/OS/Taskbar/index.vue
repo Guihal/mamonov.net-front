@@ -57,8 +57,13 @@ const closeStartMenu = () => {
       <OSTaskbarAllPrograms />
     </ul>
 
+    <!-- Wi-Fi трей (справа) -->
+    <div class="taskbar__tray">
+      <OSTaskbarWifiTray />
+    </div>
+
     <!-- Клик за пределами меню — закрыть его -->
-    <Teleport to="body">
+    <Teleport to="#__nuxt">
       <div v-if="isStartMenuOpen" class="taskbar__start-overlay" @click="closeStartMenu" />
     </Teleport>
   </nav>
@@ -75,7 +80,7 @@ const closeStartMenu = () => {
   display: flex;
   align-items: center;
 
-  z-index: 100;
+  z-index: 201;
 
   &__bg {
     position: absolute;
@@ -98,6 +103,17 @@ const closeStartMenu = () => {
     padding: 0 8px;
     gap: 2px;
     height: 100%;
+    flex: 1;
+  }
+
+  &__tray {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    height: 100%;
+    margin-left: auto;
   }
 
   &__el {
@@ -135,6 +151,7 @@ const closeStartMenu = () => {
     position: absolute;
     bottom: calc(100% + 8px);
     left: 0;
+    z-index: 202;
     background: #fff;
     border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 8px;
@@ -146,7 +163,7 @@ const closeStartMenu = () => {
   &__start-overlay {
     position: fixed;
     inset: 0;
-    z-index: 99;
+    z-index: 200;
   }
 }
 

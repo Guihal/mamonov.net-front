@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import type { WindowOb } from '../../Window'
-import WindowHeaderNavClose from './close.vue'
-import WindowHeaderNavCollapse from './collapse.vue'
-import WindowHeaderNavFullscreen from './fullscreen.vue'
 
 const windowOb = inject('windowOb') as WindowOb
 </script>
 <template>
   <div class="window__nav__wrapper">
-    <WindowHeaderNavClose />
-    <WindowHeaderNavCollapse />
-    <WindowHeaderNavFullscreen />
+    <OSWindowHeaderNavCollapse />
+    <OSWindowHeaderNavFullscreen />
+    <OSWindowHeaderNavClose />
   </div>
 </template>
 <style lang="scss">

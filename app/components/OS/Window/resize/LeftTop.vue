@@ -6,7 +6,7 @@
     const windowOb = inject('windowOb') as WindowOb;
 </script>
 <template>
-    <WindowResize :directions="directions" :windowOb />
+    <OSWindowResize :directions="directions" :windowOb />
 </template>
 <style lang="scss" scoped>
     .window__resize__controlls {

@@ -4,12 +4,13 @@ import type {
   LessonMessengerEvents,
   LessonConfig
 } from '~/types/lesson'
-import type { BrowserEvents, MessengerEvents, MailEvents } from '~/types/programs'
+import type { BrowserEvents, MessengerEvents, MailEvents, MessageConfig } from '~/types/programs'
 import type { GameControllerContext } from '~/types/game'
 import { GAME_CONTROLLER_KEY } from '~/types/game'
 import { useMascotStore } from '~/composables/mascot/useMascotStore'
 import { useGameOver } from '~/composables/game/useGameOver'
 import { useCreateAndRegisterWindow } from '~/components/OS/Window/composables/useCreateAndRegisterWindow'
+import { useWifiState } from '~/composables/os/useWifiState'
 import { PROGRAMS } from '~/utils/PROGRAMS'
 
 /**
@@ -18,10 +19,11 @@ import { PROGRAMS } from '~/utils/PROGRAMS'
  * Вызывается ОДИН РАЗ в корневом компоненте страницы урока.
  * Раздаёт контекст вниз через provide/inject.
  */
-export function useGameController(config: LessonConfig, totalSteps = 1) {
+export function useGameController(config: LessonConfig, totalSteps = Infinity) {
   const userStore = useUserStore()
   const mascotStore = useMascotStore()
   const { triggerGameOver, resetGameOver } = useGameOver()
+  const wifiState = useWifiState()
 
   // ── Игровое состояние ─────────────────────────────────────────────────────
   const step = ref(0)
@@ -33,6 +35,7 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
   function nextStep() {
     if (isFailed.value || isCompleted.value) return
 
+    mascotStore.clearPhrases()
     step.value += 1
 
     if (step.value >= totalSteps) {
@@ -42,6 +45,7 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
 
   function goToStep(n: number) {
     if (isFailed.value || isCompleted.value) return
+    mascotStore.clearPhrases()
     step.value = n
   }
 
@@ -74,7 +78,13 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
     userStore.markLessonCompleted(config.id, config.categoryId)
 
     mascotStore.setEmotion('happy')
-    mascotStore.react('Отлично! Ты справился с заданием.', 'happy', 4000)
+
+    triggerGameOver({
+      reason: '',
+      isDepleted: false,
+      isComplete: true,
+      categoryId: config.categoryId
+    })
   }
 
   function reset() {
@@ -84,6 +94,10 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
 
     mascotStore.setEmotion('neutral')
     mascotStore.clearPhrases()
+
+    if (config.wifiConfig) {
+      wifiState.init(config.wifiConfig)
+    }
 
     resetGameOver()
   }
@@ -98,6 +112,15 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
     _openBrowserTabRef.value?.(url)
   }
 
+  // messengerPushMessage — регистрируется мессенджером при монтировании.
+  const _messengerPushMessageRef = ref<((chatId: string, message: MessageConfig) => void) | null>(
+    null
+  )
+
+  function messengerPushMessage(chatId: string, message: MessageConfig) {
+    _messengerPushMessageRef.value?.(chatId, message)
+  }
+
   const ctx: GameControllerContext = {
     step: readonly(step),
     totalSteps,
@@ -106,6 +129,10 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
     nextStep,
     goToStep,
     openBrowserTab,
+    messengerPushMessage,
+    wifiConnect: (id: string) => wifiState.connect(id),
+    wifiDisconnect: () => wifiState.disconnect(),
+    wifiToggleVpn: (enabled?: boolean) => wifiState.toggleVpn(enabled),
     fail,
     complete,
     reset,
@@ -121,6 +148,13 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
   provide('registerOpenBrowserTab', (fn: (url: string) => void) => {
     _openBrowserTabRef.value = fn
   })
+  // Мессенджер при монтировании подпишет свой pushMessage сюда
+  provide(
+    'registerMessengerPushMessage',
+    (fn: (chatId: string, message: MessageConfig) => void) => {
+      _messengerPushMessageRef.value = fn
+    }
+  )
 
   provide('browserEvents', wrapBrowserEvents(config.events?.browser, ctx, isFailed, isCompleted))
   provide(
@@ -135,12 +169,19 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
   provide('browserSites', config.browserSites ?? [])
   provide('browserBookmarks', config.browserBookmarks ?? [])
 
+  // ── Wi-Fi ─────────────────────────────────────────────────────────────────
+  if (config.wifiConfig) {
+    wifiState.init(config.wifiConfig)
+    provide('wifiConfig', config.wifiConfig)
+  }
+
   provide(
     'quickActions',
     (config.quickActions ?? []).map((action) => ({
       ...action,
       onClick: () => {
         if (!isFailed.value && !isCompleted.value) {
+          mascotStore.clearPhrases()
           action.onClick(ctx)
         }
       }
@@ -149,22 +190,33 @@ export function useGameController(config: LessonConfig, totalSteps = 1) {
 
   // ── Инициализация ─────────────────────────────────────────────────────────
 
-  // Открываем окна для каждой программы из конфига урока
-  for (const programType of config.programs) {
+  // Открываем окна только для программ из openOnStart (или всех из programs, если не задано)
+  const programsToOpen = config.openOnStart ?? config.programs
+  for (const programType of programsToOpen) {
     const program = PROGRAMS[programType]
     if (!program) continue
+    const startPath = config.startPaths?.[programType] ?? `/${programType}`
     useCreateAndRegisterWindow({
       name: program.label,
       programType,
-      path: `/${programType}`
+      path: startPath
     })
   }
+
+  // Передаём startPaths в таскбар, чтобы при клике программы без окон открывался нужный путь
+  provide('pinnedStartPaths', config.startPaths ?? {})
 
   onMounted(async () => {
     await userStore.syncHp(config.categoryId)
 
     if (userStore.isDepleted) {
       triggerGameOver({ reason: '', isDepleted: true, categoryId: config.categoryId })
+      return
+    }
+
+    // Автоматическая стартовая реплика из mascotPhrases.greet (если onLessonMounted не задан)
+    if (config.mascotPhrases?.greet && !mascotStore.hasPhrases) {
+      mascotStore.enqueue({ text: config.mascotPhrases.greet, emotion: 'worried' })
     }
   })
 
@@ -205,6 +257,9 @@ function wrapBrowserEvents(
       : undefined,
     onPopupRemindClick: events.onPopupRemindClick
       ? () => guard(isFailed, isCompleted, () => events.onPopupRemindClick!(ctx))
+      : undefined,
+    onPopupClose: events.onPopupClose
+      ? () => guard(isFailed, isCompleted, () => events.onPopupClose!(ctx))
       : undefined
   }
 }

@@ -6,6 +6,7 @@ import type {
   EmailConfig,
   MailFolder
 } from './programs'
+import type { WifiConfig } from './wifi'
 import type { MascotPhraseKey } from '~/utils/constants/MASCOT_PHRASES'
 import type { GameControllerContext } from './game'
 
@@ -32,6 +33,7 @@ export interface LessonBrowserEvents {
   onTabClose?: (ctrl: GameControllerContext, url: string) => void
   onPopupDownloadClick?: (ctrl: GameControllerContext) => void
   onPopupRemindClick?: (ctrl: GameControllerContext) => void
+  onPopupClose?: (ctrl: GameControllerContext) => void
 }
 
 export interface LessonMessengerEvents {
@@ -57,15 +59,31 @@ export interface LessonConfig {
   id: string
   categoryId: string
   comic?: ComicSlide[]
+  /** Все программы урока (pinned в таскбаре + доступные для открытия). */
   programs: ProgramType[]
+  /**
+   * Программы, которые открываются окнами при старте урока.
+   * Если не задано — открываются все из `programs`.
+   */
+  openOnStart?: ProgramType[]
+  /**
+   * Стартовые пути окон при открытии программы из таскбара (и при инициализации).
+   * Например: { browser: '/browser/news-daily.ru' }
+   */
+  startPaths?: Partial<Record<ProgramType, string>>
   quickActions?: QuickAction[]
   mascotPhrases?: Partial<Record<MascotPhraseKey, string>>
 
   browserSites?: BrowserSiteConfig[]
   browserBookmarks?: BookmarkConfig[]
   messengerChats?: ChatConfig[]
+  /** ID чата, который открывается автоматически при старте мессенджера. */
+  messengerOpenChatId?: string
   mailEmails?: EmailConfig[]
   mailFolders?: MailFolder[]
+
+  /** Конфигурация Wi-Fi трея (если задана — показывается иконка Wi-Fi в таскбаре). */
+  wifiConfig?: WifiConfig
 
   events?: LessonEvents
 }

@@ -28,5 +28,10 @@ export const PROGRAMS: Record<ProgramType, ProgramView> = {
     label: 'Мессенджер',
     icon: `<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6H66V8H68V46H66V48H42L35 58L28 48H4V46H2V8H4V6ZM6 10V44H30L35 52L40 44H64V10H6ZM14 20H56V24H14V20ZM14 30H46V34H14V30Z" fill="var(--icon-color)"/></svg>`,
     component: defineAsyncComponent(() => import('~/components/OS/Programs/Messenger/index.vue'))
+  },
+  vpn: {
+    label: 'VPN',
+    icon: `<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M35 4C22.3 4 12 14.3 12 27v10H8v4h8v-4-10c0-10.5 8.5-19 19-19s19 8.5 19 19v14h4V27C58 14.3 47.7 4 35 4z" fill="var(--icon-color)"/><path d="M35 26c-7.2 0-13 5.8-13 13v8c0 7.2 5.8 13 13 13s13-5.8 13-13v-8c0-7.2-5.8-13-13-13zm5 17.5L33 48v-5H28v-4h5v-5l7 4.5v5z" fill="var(--icon-color)"/></svg>`,
+    component: defineAsyncComponent(() => import('~/components/OS/Programs/Vpn/index.vue'))
   }
 }

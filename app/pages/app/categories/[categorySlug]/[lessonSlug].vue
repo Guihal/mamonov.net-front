@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'lesson' })
+definePageMeta({ layout: 'lesson', ssr: false })
 
 import { useGameController } from '~/composables/game/useGameController'
 import { useMascotStore } from '~/composables/mascot/useMascotStore'
@@ -47,7 +47,6 @@ onUnmounted(() => {
     <OSWindowView />
     <OSQuickActions />
     <Elephant />
-    <LessonAlert />
     <GameOver />
 
     <OSTaskbar />

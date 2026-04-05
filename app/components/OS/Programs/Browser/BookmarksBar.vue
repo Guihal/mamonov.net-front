@@ -3,12 +3,12 @@ import type { BrowserEvents } from '~/types/programs'
 import type { useBrowserTabs } from '~/composables/os/useBrowserTabs'
 import type { useBrowserBookmarks } from '~/composables/os/useBrowserBookmarks'
 
-const { navigateTo } = inject('browserTabs') as ReturnType<typeof useBrowserTabs>
+const { openTab } = inject('browserTabs') as ReturnType<typeof useBrowserTabs>
 const { allBookmarks } = inject('browserBookmarks') as ReturnType<typeof useBrowserBookmarks>
 const browserEvents = inject<BrowserEvents>('browserEvents', {})
 
 function onBookmarkClick(url: string) {
-  navigateTo(url)
+  openTab(url)
   browserEvents.onBookmarkClick?.(url)
 }
 </script>

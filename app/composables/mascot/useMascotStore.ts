@@ -41,7 +41,9 @@ export const useMascotStore = defineStore('mascot', () => {
    */
   function dismissPhrase() {
     _clearDismissTimer()
+    const phrase = phrases.value[0]
     phrases.value.shift()
+    phrase?.onAfterDismiss?.()
     _activateCurrent()
   }
 

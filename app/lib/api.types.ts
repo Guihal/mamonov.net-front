@@ -1,5 +1,6 @@
 // ── Auth ──
 export interface RegisterBody {
+  name: string
   email: string
   password: string
 }
@@ -56,4 +57,11 @@ export interface LessonProgress {
 export interface HpStateExtended extends HpState {
   isDepleted: boolean
   restoredAt: string | null // ISO 8601 или null
+}
+
+export interface GameProgress {
+  total_progress: number
+  completed_lessons: number
+  total_lessons: number
+  reputation_score: number
 }

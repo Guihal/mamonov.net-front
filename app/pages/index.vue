@@ -2,6 +2,8 @@
 import { useMascotStore } from '~/composables/mascot/useMascotStore'
 import { useUser } from '~/composables/user/useUser'
 
+definePageMeta({ layout: 'default' })
+
 const mascot = useMascotStore()
 const userStore = useUser()
 
@@ -16,14 +18,18 @@ onMounted(() => {
   <div class="landing">
     <div class="landing__hero">
       <div class="landing__heading">
-        <h1 class="landing__title">
-          <span class="landing__title-line landing__title-line--right"> Стань мастером </span>
-          <span class="landing__title-line">киберзащиты через</span>
-          <span class="landing__title-line">игру: от zero to hero</span>
-        </h1>
-
+        <h1 class="landing__title">Стань мастером</h1>
+        <div class="landing__heading-text">
+          Распознай фишинг, парольную атаку и социальную инженерию в симуляторе с последствиями и
+          подсказками
+        </div>
+      </div>
+      <div class="landing__footer">
         <div class="landing__mascot">
           <Elephant position="relative" />
+        </div>
+        <div class="landing__footer-wrapper">
+          <h1 class="landing__footer-title">киберзащитЫ</h1>
         </div>
       </div>
 

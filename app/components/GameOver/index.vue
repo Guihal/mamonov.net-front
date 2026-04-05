@@ -26,6 +26,17 @@
           </div>
         </template>
 
+        <!-- Режим: Урок пройден -->
+        <template v-else-if="payload.isComplete">
+          <UIcon name="i-lucide-party-popper" class="gameover-icon gameover-icon--complete" />
+          <h2 id="gameover-title" class="gameover-title gameover-title--complete">Урок пройден!</h2>
+          <p class="gameover-body">Отличная работа — ты справился с заданием.</p>
+
+          <div class="gameover-actions">
+            <UButton color="primary" @click="goToLessons">К урокам</UButton>
+          </div>
+        </template>
+
         <!-- Режим: Game Over (HP > 0) -->
         <template v-else>
           <UIcon name="i-lucide-shield-alert" class="gameover-icon gameover-icon--error" />
@@ -59,7 +70,9 @@ function goToLessons() {
   const categoryId = payload.value?.categoryId
   resetGameOver()
   if (categoryId) {
-    router.push(`/app/${categoryId}`)
+    router.push(`/app/categories/${categoryId}`)
+  } else {
+    router.push('/app/categories')
   }
 }
 </script>
@@ -102,6 +115,10 @@ function goToLessons() {
   &--depleted {
     color: #f97316;
   }
+
+  &--complete {
+    color: #16a34a;
+  }
 }
 
 .gameover-title {
@@ -112,6 +129,10 @@ function goToLessons() {
 
   &--depleted {
     color: #f97316;
+  }
+
+  &--complete {
+    color: #16a34a;
   }
 }
 

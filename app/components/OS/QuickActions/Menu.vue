@@ -21,7 +21,10 @@ defineProps<{
   min-width: 216px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0;
+  width: 100%;
+  align-self: stretch;
+
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
 }
 </style>

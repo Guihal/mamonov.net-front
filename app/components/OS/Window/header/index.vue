@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import type { WindowOb } from '../Window'
 import { useMove } from './useMove'
-import WindowHeaderNav from './nav/index.vue'
-import WindowHeaderName from './name.vue'
 
 const windowOb = inject('windowOb') as WindowOb
 const header = ref<null | HTMLElement>(null)
-const pointerdown = useMove(windowOb)
+const { onPointerDown, onTouchStart } = useMove(windowOb)
 </script>
 <template>
   <div class="window__header" ref="header">
     <div class="window__header_el">
-      <WindowHeaderNav />
-      <div class="window__header__wrapper" @pointerdown="pointerdown">
-        <WindowHeaderName />
+      <div
+        class="window__header__wrapper"
+        @pointerdown="onPointerDown"
+        @touchstart.passive="onTouchStart"
+      >
+        <OSWindowHeaderName />
       </div>
+      <OSWindowHeaderNav />
     </div>
   </div>
 </template>
@@ -39,6 +41,7 @@ const pointerdown = useMove(windowOb)
     justify-content: center;
     align-items: center;
     padding: 0 10px;
+    touch-action: none;
   }
 }
 

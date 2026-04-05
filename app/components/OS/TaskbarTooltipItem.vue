@@ -84,7 +84,7 @@ const onMouseout = () => hide(props.programType)
   color: #fff;
   padding: 10px;
   box-sizing: border-box;
-  z-index: 120;
+  z-index: 201;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   transition-property: width;

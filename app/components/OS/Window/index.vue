@@ -9,9 +9,6 @@ import { useWindowLoop } from './composables/useWindowLoop/useWindowLoop'
 import { useWindowRoute } from './composables/useWindowRoute'
 import type { WindowOb } from './Window'
 import { useFrameObserver } from '~/composables/useFrameObserver'
-import WindowHeader from './header/index.vue'
-import WindowContent from './Content.vue'
-import WindowResizeAll from './resize/All.vue'
 
 const { windowOb } = defineProps<{
   windowOb: WindowOb
@@ -63,10 +60,10 @@ onUnmounted(() => {
     @click="focusWindow"
   >
     <div class="window__wrapper">
-      <WindowHeader />
-      <WindowContent />
+      <OSWindowHeader />
+      <OSWindowContent />
     </div>
-    <WindowResizeAll />
+    <OSWindowResizeAll />
   </div>
 </template>
 <style lang="scss">
